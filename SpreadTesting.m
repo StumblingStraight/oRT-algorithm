@@ -218,7 +218,7 @@ for jj = [1:n_groups]
         meanrtsout(jj,ii,7) = nanmean(rocvals);
 
         %Canonical Correction Search
-        [itvals2, outdat] = individualTemplateMatchRT_amp_alg5(test_acc, t, 100,1, rts2, meanrt1+vals-nanmean(vals));
+        [itvals2, outdat] = canonicalCorrectionSearch(test_acc, t, 100,1, rts2, meanrt1+vals-nanmean(vals));
         outdat_all(outdat_count+[0:n_per_group-1],1:end-1) = outdat;
         outdat_all(outdat_count+[0:n_per_group-1],end) = test_sigx(ii);
        
