@@ -15,7 +15,7 @@ Download this repository into a folder on your computer and run the files with M
 TBD
 
 ## Contributors
-D. Tanis PhD
+D. Tanis PhD;
 I. Kurtzer PhD
 
 ## Contact
