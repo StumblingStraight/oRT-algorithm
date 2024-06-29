@@ -55,7 +55,6 @@ peakinds = peaks;   %note that peak inds are relative to the cue
 meanpeaks = nan(n_groups,length(test_std));
 meanpeakinds = meanpeaks;
 
-outdat_all = nan(n_per_group*n_groups*length(test_std),9);
 indiv_errors = nan(n_per_group*n_groups, length(test_std),10);
 
 
@@ -72,9 +71,6 @@ group_mult = 1;
 
 group_size = n_subs*group_mult;
 
-
-
-outdat_count = 1;
 
 %Step through each batch to test:
 for jj = [1:n_groups]
@@ -178,7 +174,7 @@ for jj = [1:n_groups]
         %now test the algorithms:
         
         %Individual Threshold:
-        vals = individualoRT(test_v, test_acc, t, 12.5, 100);
+        vals = individualoRT(test_acc, t, 12.5, 100);
 
         meanrtsout(jj,ii,1) = nanmean(vals);
         stdrtsout(jj,ii,1) = nanstd(vals-rts2);
@@ -187,7 +183,7 @@ for jj = [1:n_groups]
         indiv_errors((jj-1)*n_per_group+1+[0:n_per_group-1],ii,1) = vals-rts2;
         
         %Individual Regression:
-        vals2 = individualRegression_testing(test_acc,t,100,20, orig_test_acc2, rts2);
+        vals2 = individualRegression(test_acc,t,20,100);
 
         meanrtsout(jj,ii,2) = nanmean(vals2);
         stdrtsout(jj,ii,2) = nanstd(vals2-rts2);
@@ -206,30 +202,27 @@ for jj = [1:n_groups]
         shifted_accs = indShift(test_acc, shift_1);
         [tsgmean1, tstmean1] = grandMean(indShift(test_acc, shift_1),t);
         meanrt1 = individualRegression({tsgmean1},{tstmean1},100,25);
+        threshGMRrts = meanrt1+vals-nanmean(vals);
 
-        meanrtsout(jj,ii,5) = nanmean(meanrt1+vals-nanmean(vals));
-        stdrtsout(jj,ii,5) = nanstd(meanrt1+vals-nanmean(vals)-rts2);
-        SSErtsout(jj,ii,5) = nansae(meanrt1+vals-nanmean(vals), rts2);
-        perc_nans(jj,ii,5) = sum(isnan(meanrt1+vals-nanmean(vals)))/length(vals);
-        indiv_errors((jj-1)*n_per_group+1+[0:n_per_group-1],ii,5) = meanrt1+vals-nanmean(vals)-rts2;
+        meanrtsout(jj,ii,5) = nanmean(threshGMRrts);
+        stdrtsout(jj,ii,5) = nanstd(threshGMRrts);
+        SSErtsout(jj,ii,5) = nansae(threshGMRrts);
+        perc_nans(jj,ii,5) = sum(isnan(threshGMRrts))/length(vals);
+        indiv_errors((jj-1)*n_per_group+1+[0:n_per_group-1],ii,5) = threshGMRrts-rts2;
 
         %ROC
         rocvals = ROC_RT(test_v, t, noise_v);
         meanrtsout(jj,ii,7) = nanmean(rocvals);
 
         %Canonical Correction Search
-        [itvals2, outdat] = canonicalCorrectionSearch(test_acc, t, 100,1);
-        outdat_all(outdat_count+[0:n_per_group-1],1:end-1) = outdat;
-        outdat_all(outdat_count+[0:n_per_group-1],end) = test_sigx(ii);
+        ccsrts = canonicalCorrectionSearch(test_acc, t, 100,1);
        
-        meanrtsout(jj,ii,9) = nanmean(itvals2);
-        stdrtsout(jj,ii,9) = nanstd(itvals2-rts2);
-        SSErtsout(jj,ii,9) = nansae(itvals2, rts2);
-        perc_nans(jj,ii,9) = sum(isnan(itvals2))/length(itvals2);
-        indiv_errors((jj-1)*10+1+[0:9],ii,9) = itvals2-rts2;
+        meanrtsout(jj,ii,9) = nanmean(ccsrts);
+        stdrtsout(jj,ii,9) = nanstd(ccsrts-rts2);
+        SSErtsout(jj,ii,9) = nansae(ccsrts, rts2);
+        perc_nans(jj,ii,9) = sum(isnan(ccsrts))/length(ccsrts);
+        indiv_errors((jj-1)*10+1+[0:9],ii,9) = ccsrts-rts2;
         
-        
-        outdat_count = outdat_count+10
         
         %plot results every 30 loops:
         if loops > 30
